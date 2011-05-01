@@ -4,6 +4,7 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import junit.framework.TestCase;
 import org.jruby.Ruby;
+import org.jruby.RubyArray;
 import org.jruby.RubyObject;
 import org.jruby.embed.ScriptingContainer;
 
@@ -30,6 +31,7 @@ public class BasicTest extends TestCase {
         xs.registerConverter(new RubyFixnumConverter(runtime));
         xs.registerConverter(new RubyIntegerConverter(runtime));
         xs.registerConverter(new RubyBooleanConverter(runtime));
+        xs.registerConverter(new RubyArrayConverter(xs,runtime));
         xs.registerConverter(new JRubyXStreamConverter(xs,runtime), XStream.PRIORITY_LOW);
     }
 
@@ -37,7 +39,17 @@ public class BasicTest extends TestCase {
         RubyObject o = (RubyObject)jruby.runScriptlet("require 'org/jenkinsci/jruby/basicTest'; o = Foo.new; o.bar = Bar.new; o.bar.x='test'; o.bar.y=5; o.bar.foo=Foo.new; o");
         String xml = xs.toXML(o);
         System.out.println(xml);
-
         Object r = xs.fromXML(xml);
+    }
+
+    public void testArray() {
+        RubyArray before = (RubyArray)jruby.runScriptlet("[1,\"abc\",nil]");
+        String xml = xs.toXML(before);
+        System.out.println(xml);
+        RubyArray after = (RubyArray) xs.fromXML(xml);
+
+        assertEquals(before.length(), after.length());
+        for (int i=0; i<before.getLength(); i++)
+            assertEquals(before.entry(i), after.entry(i));
     }
 }

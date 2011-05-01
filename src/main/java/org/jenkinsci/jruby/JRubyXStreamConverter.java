@@ -63,7 +63,9 @@ public class JRubyXStreamConverter implements Converter {
         Class r = c.getReifiedClass();
         if (r!=null) {
             // forward to primitive type converters
-            return xs.getConverterLookup().lookupConverterForType(r).unmarshal(reader,context);
+            Converter cnv = xs.getConverterLookup().lookupConverterForType(r);
+            if (cnv!=this)
+                return cnv.unmarshal(reader, context);
         }
         IRubyObject o = c.allocate();
 
