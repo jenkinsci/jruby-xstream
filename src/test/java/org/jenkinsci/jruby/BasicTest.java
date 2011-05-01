@@ -8,6 +8,7 @@ import org.jruby.RubyArray;
 import org.jruby.RubyHash;
 import org.jruby.RubyObject;
 import org.jruby.embed.ScriptingContainer;
+import org.jruby.runtime.ThreadContext;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -32,7 +33,9 @@ public class BasicTest extends TestCase {
         xs.registerConverter(new RubyFixnumConverter(runtime));
         xs.registerConverter(new RubyIntegerConverter(runtime));
         xs.registerConverter(new RubyBooleanConverter(runtime));
+        xs.registerConverter(new RubySymbolConverter(runtime));
         xs.registerConverter(new RubyArrayConverter(runtime));
+        xs.registerConverter(new RubyHashConverter(runtime));
         xs.registerConverter(new JRubyXStreamConverter(xs,runtime), XStream.PRIORITY_LOW);
     }
 
@@ -55,6 +58,8 @@ public class BasicTest extends TestCase {
     public void testHash() {
         RubyHash before = (RubyHash)jruby.runScriptlet("{ 1 => 5, \"foo\" => \"bar\", :abc => :def, \"d\" => [nil,nil]}");
         RubyHash after = roundtrip(before);
+
+        assertTrue(before.op_equal(ThreadContext.newContext(jruby.getRuntime()),after).isTrue());
     }
 
     private <T> T roundtrip(T before) {

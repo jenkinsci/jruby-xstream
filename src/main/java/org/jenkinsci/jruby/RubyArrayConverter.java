@@ -24,8 +24,11 @@ public class RubyArrayConverter implements Converter {
     }
 
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext context) {
+
         RubyArray ra = (RubyArray) o;
         int len = ra.getLength();
+
+        writer.addAttribute("ruby-class", ra.getType().getName());
 
         for (int i = 0; i < len; i++) {
             IRubyObject item = ra.entry(i);
