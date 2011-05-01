@@ -1,10 +1,8 @@
 package org.jenkinsci.jruby;
 
-import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.converters.collections.AbstractCollectionConverter;
-import com.thoughtworks.xstream.io.ExtendedHierarchicalStreamWriterHelper;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.jruby.Ruby;
@@ -14,11 +12,10 @@ import org.jruby.runtime.builtin.IRubyObject;
 /**
  * @author Kohsuke Kawaguchi
  */
-public class RubyArrayConverter extends AbstractCollectionConverter {
+public class RubyArrayConverter implements Converter {
     private final Ruby runtime;
 
-    public RubyArrayConverter(XStream xs, Ruby runtime) {
-        super(xs.getMapper());
+    public RubyArrayConverter(Ruby runtime) {
         this.runtime = runtime;
     }
 
@@ -39,7 +36,6 @@ public class RubyArrayConverter extends AbstractCollectionConverter {
         }
     }
 
-    @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         RubyArray a = RubyArray.newArray(runtime);
 
