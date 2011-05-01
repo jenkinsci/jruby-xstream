@@ -28,6 +28,8 @@ public class BasicTest extends TestCase {
         Ruby runtime = jruby.getProvider().getRuntime();
         xs.registerConverter(new RubyStringConverter(runtime));
         xs.registerConverter(new RubyFixnumConverter(runtime));
+        xs.registerConverter(new RubyIntegerConverter(runtime));
+        xs.registerConverter(new RubyBooleanConverter(runtime));
         xs.registerConverter(new JRubyXStreamConverter(xs,runtime), XStream.PRIORITY_LOW);
     }
 
