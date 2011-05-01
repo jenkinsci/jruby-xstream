@@ -1,25 +1,23 @@
 package org.jenkinsci.jruby;
 
-import com.thoughtworks.xstream.converters.basic.AbstractSingleValueConverter;
 import org.jruby.Ruby;
 import org.jruby.RubyString;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class RubyStringConverter extends AbstractSingleValueConverter {
-    private final Ruby runtime;
-
+public class RubyStringConverter extends AbstractRubyPrimitiveValueConverter<RubyString> {
     public RubyStringConverter(Ruby runtime) {
-        this.runtime = runtime;
-    }
-
-    public boolean canConvert(Class type) {
-        return type==RubyString.class;
+        super(runtime, RubyString.class);
     }
 
     @Override
-    public Object fromString(String str) {
+    protected String toString(RubyString obj) {
+        return obj.toString();
+    }
+
+    @Override
+    public RubyString fromString(String str) {
         return RubyString.newString(runtime,str);
     }
 }
