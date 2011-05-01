@@ -4,9 +4,9 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.converters.collections.AbstractCollectionConverter;
+import com.thoughtworks.xstream.io.ExtendedHierarchicalStreamWriterHelper;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.mapper.Mapper;
 import org.jruby.Ruby;
 import org.jruby.RubyArray;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -31,8 +31,11 @@ public class RubyArrayConverter extends AbstractCollectionConverter {
         int len = ra.getLength();
 
         for (int i = 0; i < len; i++) {
-            Object item = ra.entry(i);
-            writeItem(item, context, writer);
+            IRubyObject item = ra.entry(i);
+
+            writer.startNode("item");
+            context.convertAnother(item);
+            writer.endNode();
         }
     }
 
@@ -43,7 +46,7 @@ public class RubyArrayConverter extends AbstractCollectionConverter {
         // read the items from xml into a list
         while (reader.hasMoreChildren()) {
             reader.moveDown();
-            IRubyObject item = (IRubyObject)readItem(reader, context, null);
+            IRubyObject item = (IRubyObject)context.convertAnother(null, IRubyObject.class);
             a.append(item);
             reader.moveUp();
         }
