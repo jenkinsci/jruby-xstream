@@ -11,11 +11,15 @@ import org.jruby.embed.ScriptingContainer;
  * @author Kohsuke Kawaguchi
  */
 public class BasicTest extends TestCase {
-    public void test1() {
-        ScriptingContainer jruby = new ScriptingContainer();
-        RubyObject o = (RubyObject)jruby.runScriptlet("require 'org/jenkinsci/jruby/basicTest'; o = Foo.new; o.bar = Bar.new; o.bar.x='test'; o.bar.y=5; o.bar.foo=Foo.new; o");
+    private ScriptingContainer jruby;
+    private XStream xs;
 
-        XStream xs = new XStream() {
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        jruby = new ScriptingContainer();
+        xs = new XStream() {
             @Override
             protected MapperWrapper wrapMapper(MapperWrapper next) {
                 return new JRubyMapper(next);
@@ -24,7 +28,14 @@ public class BasicTest extends TestCase {
         Ruby runtime = jruby.getProvider().getRuntime();
         xs.registerConverter(new RubyStringConverter(runtime));
         xs.registerConverter(new RubyFixnumConverter(runtime));
-        xs.registerConverter(new JRubyXStreamConverter(runtime,xs.getMapper()), XStream.PRIORITY_LOW);
-        System.out.println(xs.toXML(o));
+        xs.registerConverter(new JRubyXStreamConverter(xs,runtime), XStream.PRIORITY_LOW);
+    }
+
+    public void test1() {
+        RubyObject o = (RubyObject)jruby.runScriptlet("require 'org/jenkinsci/jruby/basicTest'; o = Foo.new; o.bar = Bar.new; o.bar.x='test'; o.bar.y=5; o.bar.foo=Foo.new; o");
+        String xml = xs.toXML(o);
+        System.out.println(xml);
+
+        Object r = xs.fromXML(xml);
     }
 }

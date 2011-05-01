@@ -1,5 +1,6 @@
 package org.jenkinsci.jruby;
 
+import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -17,15 +18,17 @@ import org.jruby.runtime.builtin.Variable;
  */
 public class JRubyXStreamConverter implements Converter {
     private final Ruby runtime;
+    private final XStream xs;
     protected final Mapper mapper;
 
-    public JRubyXStreamConverter(Ruby runtime, Mapper mapper) {
+    public JRubyXStreamConverter(XStream xs, Ruby runtime) {
+        this.xs = xs;
         this.runtime = runtime;
-        this.mapper = mapper;
+        this.mapper = xs.getMapper();
     }
 
     public boolean canConvert(Class type) {
-        return RubyBasicObject.class.isAssignableFrom(type);
+        return IRubyObject.class.isAssignableFrom(type);
     }
 
     public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
@@ -57,6 +60,11 @@ public class JRubyXStreamConverter implements Converter {
         RubyClass c = runtime.getClass(className);
         // TODO: error handling in class resolution
 
+        Class r = c.getReifiedClass();
+        if (r!=null) {
+            // forward to primitive type converters
+            return xs.getConverterLookup().lookupConverterForType(r).unmarshal(reader,context);
+        }
         IRubyObject o = c.allocate();
 
         while (reader.hasMoreChildren()) {
