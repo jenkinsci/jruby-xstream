@@ -34,6 +34,15 @@ public class JRubyMapper extends MapperWrapper {
             return super.realClass(elementName);
     }
 
+    @Override
+    public boolean shouldSerializeMember(Class definedIn, String fieldName) {
+        // the handler field contains a reference to Ruby object, and we handle this separately
+        // see JavaProxyConverter
+        if (InternalJavaProxy.class.isAssignableFrom(definedIn) && fieldName.equals("__handler"))
+            return false;
+        return super.shouldSerializeMember(definedIn,fieldName);
+    }
+
     /**
      * Place holder type used for dynamic proxies.
      */

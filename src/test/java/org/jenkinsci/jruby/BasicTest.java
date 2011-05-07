@@ -4,11 +4,9 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import junit.framework.TestCase;
 import org.jruby.RubyArray;
-import org.jruby.RubyClass;
 import org.jruby.RubyHash;
 import org.jruby.RubyObject;
 import org.jruby.embed.ScriptingContainer;
-import org.jruby.javasupport.proxy.InternalJavaProxy;
 import org.jruby.runtime.ThreadContext;
 
 /**
@@ -64,12 +62,15 @@ public class BasicTest extends TestCase {
     public void testProxy() {
         Point before = (Point)jruby.runScriptlet("require 'org/jenkinsci/jruby/testProxy'; o=PointSubType.new; o.z=5; o");
         assertEquals(5,before.z());
-        RubyClass c = ((InternalJavaProxy) before).___getInvocationHandler().getOrig().getMetaClass();
+        before.x = 1;
+        before.y = 2;
 
         Point after = roundtrip(new Point[]{before})[0];
         System.out.println(before);
         System.out.println(after);
 
         assertEquals(5,after.z());
+        assertEquals(1,after.x);
+        assertEquals(2,after.y);
     }
 }

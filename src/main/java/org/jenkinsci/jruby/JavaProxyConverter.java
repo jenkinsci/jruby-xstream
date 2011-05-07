@@ -4,6 +4,7 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.converters.reflection.AbstractReflectionConverter;
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
@@ -32,9 +33,11 @@ import java.lang.reflect.Field;
 public class JavaProxyConverter implements Converter {
     private final Ruby runtime;
     private final ReflectionProvider reflectionProvider;
+    private final AbstractReflectionConverter reflectionConverter;
 
-    public JavaProxyConverter(Ruby runtime,XStream owner) {
+    public JavaProxyConverter(Ruby runtime, XStream owner, AbstractReflectionConverter reflectionConverter) {
         this.runtime = runtime;
+        this.reflectionConverter = reflectionConverter;
         this.reflectionProvider = owner.getReflectionProvider();
     }
 
@@ -46,9 +49,12 @@ public class JavaProxyConverter implements Converter {
         InternalJavaProxy p = (InternalJavaProxy)o;
         IRubyObject base = p.___getInvocationHandler().getOrig();
 
-        writer.startNode("original");
+        writer.startNode("ruby-object");
         context.convertAnother(base);
         writer.endNode();
+
+        // marshal the Java portion of it, which comes from the base type
+        reflectionConverter.marshal(o,writer,context);
     }
 
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
@@ -73,6 +79,9 @@ public class JavaProxyConverter implements Converter {
         } catch (IllegalAccessException e) {
             throw new Error(e);
         }
+
+        // unmarshal the Java portion that comes from the base type
+        reflectionConverter.doUnmarshal(javaObject,reader,context);
 
         return javaObject;
     }
