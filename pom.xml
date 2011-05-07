@@ -28,4 +28,24 @@
         <version>1.6.1</version>
       </dependency>
     </dependencies>
+
+  <scm>
+    <connection>scm:git:git://github.com/jenkinsci/jruby-xstream.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/jruby-xstream.git</developerConnection>
+    <url>https://github.com/jenkinsci/jruby-xstream</url>
+  </scm>
+
+  <repositories>
+    <repository>
+      <id>m.g.o-public</id>
+      <url>http://maven.glassfish.org/content/groups/public/</url>
+    </repository>
+  </repositories>
+  <licenses>
+    <license>
+      <name>The MIT license</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 </project>
