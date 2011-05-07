@@ -2,9 +2,13 @@ package org.jenkinsci.jruby;
 
 import com.thoughtworks.xstream.mapper.Mapper;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+import org.jruby.RubyBasicObject;
 import org.jruby.javasupport.proxy.InternalJavaProxy;
 
 /**
+ * Set the proper alias for JRuby objects and proxy objects,
+ * so that implementation detail class names won't leak out to the persisted form.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class JRubyMapper extends MapperWrapper {
@@ -13,19 +17,21 @@ public class JRubyMapper extends MapperWrapper {
     }
 
     public String serializedClass(Class type) {
-        if (InternalJavaProxy.class.isAssignableFrom(type)) {
-            return ALIAS;
-        } else {
+        if (InternalJavaProxy.class.isAssignableFrom(type))
+            return RUBY_PROXY;
+        if (RubyBasicObject.class.isAssignableFrom(type))
+            return RUBY_OBJECT;
+        else
             return super.serializedClass(type);
-        }
     }
 
     public Class realClass(String elementName) {
-        if (elementName.equals(ALIAS)) {
+        if (elementName.equals(RUBY_PROXY))
             return DynamicProxy.class;
-        } else {
+        if (elementName.equals(RUBY_OBJECT))
+            return RubyBasicObject.class;
+        else
             return super.realClass(elementName);
-        }
     }
 
     /**
@@ -33,5 +39,6 @@ public class JRubyMapper extends MapperWrapper {
      */
     public static class DynamicProxy {}
 
-    private static final String ALIAS = "ruby-proxy-object";
+    private static final String RUBY_PROXY = "ruby-proxy-object";
+    private static final String RUBY_OBJECT = "ruby-object";
 }
