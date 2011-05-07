@@ -21,6 +21,7 @@ public class JRubyXStream {
         xs.registerConverter(new RubySymbolConverter(runtime));
         xs.registerConverter(new RubyArrayConverter(runtime));
         xs.registerConverter(new RubyHashConverter(runtime));
+        xs.registerConverter(new JavaProxyConverter(runtime,xs));
         xs.registerConverter(new JRubyXStreamConverter(xs,runtime), XStream.PRIORITY_LOW);
     }
 

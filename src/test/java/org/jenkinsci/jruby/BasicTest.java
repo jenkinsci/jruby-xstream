@@ -5,10 +5,15 @@ import com.thoughtworks.xstream.mapper.MapperWrapper;
 import junit.framework.TestCase;
 import org.jruby.Ruby;
 import org.jruby.RubyArray;
+import org.jruby.RubyClass;
 import org.jruby.RubyHash;
 import org.jruby.RubyObject;
 import org.jruby.embed.ScriptingContainer;
+import org.jruby.java.proxies.JavaProxy;
+import org.jruby.javasupport.proxy.InternalJavaProxy;
+import org.jruby.javasupport.proxy.JavaProxyClass;
 import org.jruby.runtime.ThreadContext;
+import org.jruby.runtime.builtin.IRubyObject;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -22,7 +27,12 @@ public class BasicTest extends TestCase {
         super.setUp();
 
         jruby = new ScriptingContainer();
-        xs = new XStream();
+        xs = new XStream() {
+            @Override
+            protected MapperWrapper wrapMapper(MapperWrapper next) {
+                return new JRubyMapper(next);
+            }
+        };
         JRubyXStream.register(xs, jruby.getProvider().getRuntime());
     }
 
@@ -53,5 +63,14 @@ public class BasicTest extends TestCase {
         String xml = xs.toXML(before);
         System.out.println(xml);
         return (T) xs.fromXML(xml);
+    }
+
+    public void testProxy() {
+        Point before = (Point)jruby.runScriptlet("require 'org/jenkinsci/jruby/testProxy'; o=PointSubType.new; o.z=5; o");
+        RubyClass c = ((InternalJavaProxy) before).___getInvocationHandler().getOrig().getMetaClass();
+
+        Object after = roundtrip(new Object[]{before})[0];
+        System.out.println(before);
+        System.out.println(after);
     }
 }
