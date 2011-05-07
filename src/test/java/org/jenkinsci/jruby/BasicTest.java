@@ -22,12 +22,7 @@ public class BasicTest extends TestCase {
         super.setUp();
 
         jruby = new ScriptingContainer();
-        xs = new XStream() {
-            @Override
-            protected MapperWrapper wrapMapper(MapperWrapper next) {
-                return new JRubyMapper(next);
-            }
-        };
+        xs = new XStream();
         Ruby runtime = jruby.getProvider().getRuntime();
         xs.registerConverter(new RubyStringConverter(runtime));
         xs.registerConverter(new RubyFixnumConverter(runtime));
