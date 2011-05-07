@@ -17,9 +17,9 @@ public class JRubyMapper extends MapperWrapper {
     }
 
     public String serializedClass(Class type) {
-        if (InternalJavaProxy.class.isAssignableFrom(type))
+        if (type!=null && InternalJavaProxy.class.isAssignableFrom(type))
             return RUBY_PROXY;
-        if (RubyBasicObject.class.isAssignableFrom(type))
+        if (type!=null && RubyBasicObject.class.isAssignableFrom(type))
             return RUBY_OBJECT;
         else
             return super.serializedClass(type);
