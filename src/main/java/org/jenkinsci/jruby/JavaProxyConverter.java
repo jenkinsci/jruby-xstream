@@ -24,6 +24,9 @@ import org.jruby.runtime.builtin.IRubyObject;
 import java.lang.reflect.Field;
 
 /**
+ * Converts instances of Java classes that represent Ruby objects whose classes derive
+ * from some existing Java class.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class JavaProxyConverter implements Converter {
