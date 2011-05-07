@@ -3,6 +3,8 @@ package org.jenkinsci.jruby;
 /**
 * @author Kohsuke Kawaguchi
 */
-public class Point {
+public abstract class Point {
     public int x, y;
+
+    public abstract int z();
 }
