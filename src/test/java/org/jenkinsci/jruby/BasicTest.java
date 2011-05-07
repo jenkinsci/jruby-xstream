@@ -23,15 +23,7 @@ public class BasicTest extends TestCase {
 
         jruby = new ScriptingContainer();
         xs = new XStream();
-        Ruby runtime = jruby.getProvider().getRuntime();
-        xs.registerConverter(new RubyStringConverter(runtime));
-        xs.registerConverter(new RubyFixnumConverter(runtime));
-        xs.registerConverter(new RubyIntegerConverter(runtime));
-        xs.registerConverter(new RubyBooleanConverter(runtime));
-        xs.registerConverter(new RubySymbolConverter(runtime));
-        xs.registerConverter(new RubyArrayConverter(runtime));
-        xs.registerConverter(new RubyHashConverter(runtime));
-        xs.registerConverter(new JRubyXStreamConverter(xs,runtime), XStream.PRIORITY_LOW);
+        JRubyXStream.register(xs, jruby.getProvider().getRuntime());
     }
 
     public void test1() {
