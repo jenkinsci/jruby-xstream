@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.18</version>
+    <version>1.19</version>
   </parent>
 
   <artifactId>jruby-xstream</artifactId>
@@ -37,13 +37,6 @@
     <developerConnection>scm:git:ssh://git@github.com/jenkinsci/jruby-xstream.git</developerConnection>
     <url>https://github.com/jenkinsci/jruby-xstream</url>
   </scm>
-
-  <distributionManagement>
-    <snapshotRepository>
-      <id>maven.jenkins-ci.org</id>
-      <url>http://maven.jenkins-ci.org:8081/content/repositories/releases</url>
-    </snapshotRepository>
-  </distributionManagement>
 
   <repositories>
     <repository>
