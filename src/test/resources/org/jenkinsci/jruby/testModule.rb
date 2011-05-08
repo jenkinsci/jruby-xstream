@@ -1,4 +1,4 @@
-module Foo
+module ModuleTest
   module Bar
     class Zot
       attr_accessor :a
