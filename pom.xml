@@ -38,6 +38,13 @@
     <url>https://github.com/jenkinsci/jruby-xstream</url>
   </scm>
 
+  <distributionManagement>
+    <snapshotRepository>
+      <id>maven.jenkins-ci.org</id>
+      <url>http://maven.jenkins-ci.org:8081/content/repositories/releases</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <repositories>
     <repository>
       <id>m.g.o-public</id>
