@@ -58,7 +58,8 @@ public class JRubyXStreamConverter implements Converter {
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         String className = reader.getAttribute("ruby-class");
         RubyClass c = runtime.getClass(className);
-        // TODO: error handling in class resolution
+        if (c==null)
+            throw new IllegalArgumentException("Undefined class: "+className);
 
         Class r = c.getReifiedClass();
         if (r!=null) {
