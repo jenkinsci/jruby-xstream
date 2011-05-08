@@ -73,4 +73,13 @@ public class BasicTest extends TestCase {
         assertEquals(1,after.x);
         assertEquals(2,after.y);
     }
+
+    /**
+     * Tests the class name resolution in a module.
+     */
+    public void testModule() {
+        RubyObject o = (RubyObject)jruby.runScriptlet("require 'org/jenkinsci/jruby/testModule'; o = Foo::Bar::Zot.new; o.a='test'; o");
+        RubyObject r = roundtrip(o);
+        assertEquals(o.getMetaClass(),r.getMetaClass());
+    }
 }

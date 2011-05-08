@@ -10,6 +10,7 @@ import com.thoughtworks.xstream.mapper.Mapper;
 import org.jruby.Ruby;
 import org.jruby.RubyBasicObject;
 import org.jruby.RubyClass;
+import org.jruby.RubyModule;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.runtime.builtin.Variable;
 
@@ -57,7 +58,7 @@ public class JRubyXStreamConverter implements Converter {
 
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         String className = reader.getAttribute("ruby-class");
-        RubyClass c = runtime.getClass(className);
+        RubyClass c = resolveClass(className);
         if (c==null)
             throw new IllegalArgumentException("Undefined class: "+className);
 
@@ -91,5 +92,24 @@ public class JRubyXStreamConverter implements Converter {
             reader.moveUp();
         }
         return o;
+    }
+
+    /**
+     * Resolves a fully qualified class name like "Foo::Bar::Zot" to {@link RubyClass}.
+     */
+    private RubyClass resolveClass(String className) {
+        RubyModule cur = runtime.getObject();
+        for (String token : className.split("::")) {
+            IRubyObject o = cur.getConstantAt(token);
+            if (o instanceof RubyModule) {
+                cur = (RubyModule) o;
+                continue;
+            }
+            return null;    // undefined
+        }
+
+        if (cur instanceof RubyClass)
+            return (RubyClass) cur;
+        return null;
     }
 }
