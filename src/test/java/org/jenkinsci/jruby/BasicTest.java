@@ -82,4 +82,20 @@ public class BasicTest extends TestCase {
         RubyObject r = roundtrip(o);
         assertEquals(o.getMetaClass(),r.getMetaClass());
     }
+
+    public void testTransient() {
+        RubyObject pt = (RubyObject)jruby.runScriptlet("require 'org/jenkinsci/jruby/transient'; pt=Point.new; pt.x=1; pt.y=2; pt");
+        RubyObject r = roundtrip(pt);
+
+        assertTrue(r.callMethod("x").isNil());
+        assertEquals(2,r.callMethod("y").toJava(int.class));    // non-transient
+    }
+
+    public void testReadCompleted() {
+        RubyObject f = (RubyObject)jruby.runScriptlet("require 'org/jenkinsci/jruby/read_completed'; F.new");
+        RubyObject r = roundtrip(f);
+
+        // verify the call order of read_completed
+        assertEquals("bdf",r.callMethod("s").toJava(String.class));
+    }
 }

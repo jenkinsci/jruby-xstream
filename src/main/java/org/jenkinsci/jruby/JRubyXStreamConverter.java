@@ -11,21 +11,31 @@ import org.jruby.Ruby;
 import org.jruby.RubyBasicObject;
 import org.jruby.RubyClass;
 import org.jruby.RubyModule;
+import org.jruby.RubySymbol;
+import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.runtime.builtin.Variable;
 
 /**
+ * {@link Converter} for converting generic JRuby objects.  
+ *
+ * <p>
+ * If "transient?" instance method is defined on the class itself, this will consult that to find
+ * which instance variables are transient, and it'll skip persisting those.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class JRubyXStreamConverter implements Converter {
     private final Ruby runtime;
     private final XStream xs;
     protected final Mapper mapper;
+    private final RubySymbol read_completed;
 
     public JRubyXStreamConverter(XStream xs, Ruby runtime) {
         this.xs = xs;
         this.runtime = runtime;
         this.mapper = xs.getMapper();
+        read_completed = runtime.newSymbol("read_completed");
     }
 
     public boolean canConvert(Class type) {
@@ -34,12 +44,21 @@ public class JRubyXStreamConverter implements Converter {
 
     public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
         RubyBasicObject o = (RubyBasicObject) source;
-        writer.addAttribute("ruby-class", o.getType().getName());
+        RubyClass t = o.getType();
+        writer.addAttribute("ruby-class", t.getName());
+
+        boolean hasTransient = t.getType().getMethods().containsKey("transient?");
 
         for (Variable v : o.getVariableList()) {
             Object value = v.getValue();
             if (value ==null)   continue;
-            writer.startNode(v.getName().substring(1)); // cut off the first '@'
+
+            String vname = v.getName().substring(1);    // cut off the first '@'
+
+            if (hasTransient && t.callMethod("transient?", runtime.newString(vname)).isTrue())
+                continue;   // transient field
+
+            writer.startNode(vname);
 
             if (!(value instanceof IRubyObject)) {
                 // if a ruby object refers to another ruby object, just rely on @ruby-class
@@ -91,7 +110,25 @@ public class JRubyXStreamConverter implements Converter {
 
             reader.moveUp();
         }
+
+        // invoke readResolve if available
+        callReadCompleted(o, o.getType());
+
         return o;
+    }
+
+    /**
+     * Invokes all the defined read_completed methods.
+     */
+    private void callReadCompleted(IRubyObject o, RubyClass type) {
+        RubyClass s = type.getSuperClass();
+        if (s!=null)    callReadCompleted(o, s);   // super class first
+
+        if (type.callMethod("method_defined?", read_completed).isTrue() || type.callMethod("private_method_defined?", read_completed).isTrue()) {
+            ThreadContext c = runtime.getCurrentContext();
+            IRubyObject m = type.callMethod("instance_method", read_completed);
+            m.callMethod(c,"bind",o).callMethod(c,"call");
+        }
     }
 
     /**
