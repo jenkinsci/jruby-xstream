@@ -22,7 +22,7 @@ import java.util.List;
  * {@link Converter} for converting generic JRuby objects.
  *
  * <p>
- * If "transient?" instance method is defined on the class itself, this will consult that to find
+ * If "transient?" class method is defined, we will consult that method to find
  * which instance variables are transient, and it'll skip persisting those.
  *
  * @author Kohsuke Kawaguchi
