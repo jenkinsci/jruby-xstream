@@ -97,5 +97,6 @@ public class BasicTest extends TestCase {
 
         // verify the call order of read_completed
         assertEquals("bdf",r.callMethod("s").toJava(String.class));
+	    assertEquals("y", r.callMethod("x").toJava(String.class));
     }
 }
