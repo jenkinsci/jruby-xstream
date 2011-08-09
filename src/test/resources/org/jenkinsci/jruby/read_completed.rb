@@ -1,3 +1,10 @@
+module X
+  attr_reader :x
+  def read_completed
+    @x = "y"
+  end
+end
+
 class B
   attr_reader :s
   private
@@ -7,6 +14,7 @@ class B
 end
 
 class D < B
+  include X
   private
   def read_completed()
     @s += "d"

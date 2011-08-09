@@ -31,7 +31,7 @@ public class BasicTest extends TestCase {
     }
 
     public void test1() {
-        RubyObject o = (RubyObject)jruby.runScriptlet("require 'org/jenkinsci/jruby/basicTest'; o = Foo.new; o.bar = Bar.new; o.bar.x='test'; o.bar.y=5; o.bar.foo=Foo.new; o");
+        RubyObject o = (RubyObject)jruby.runScriptlet("require 'org/jenkinsci/jruby/basic_test'\n o = Foo.new\n o.bar = Bar.new\n o.bar.x='test'; o.bar.y=5; o.bar.foo=Foo.new; o");
         String xml = xs.toXML(o);
         System.out.println(xml);
         Object r = xs.fromXML(xml);
@@ -97,5 +97,6 @@ public class BasicTest extends TestCase {
 
         // verify the call order of read_completed
         assertEquals("bdf",r.callMethod("s").toJava(String.class));
+	    assertEquals("y", r.callMethod("x").toJava(String.class));
     }
 }

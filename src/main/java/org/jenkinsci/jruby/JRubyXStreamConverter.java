@@ -16,8 +16,10 @@ import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.runtime.builtin.Variable;
 
+import java.util.List;
+
 /**
- * {@link Converter} for converting generic JRuby objects.  
+ * {@link Converter} for converting generic JRuby objects.
  *
  * <p>
  * If "transient?" instance method is defined on the class itself, this will consult that to find
@@ -112,7 +114,7 @@ public class JRubyXStreamConverter implements Converter {
         }
 
         // invoke readResolve if available
-        callReadCompleted(o, o.getType());
+        callReadCompleted(o);
 
         return o;
     }
@@ -120,15 +122,17 @@ public class JRubyXStreamConverter implements Converter {
     /**
      * Invokes all the defined read_completed methods.
      */
-    private void callReadCompleted(IRubyObject o, RubyClass type) {
-        RubyClass s = type.getSuperClass();
-        if (s!=null)    callReadCompleted(o, s);   // super class first
+    private void callReadCompleted(IRubyObject o) {
+	    List<IRubyObject> ancestors = o.getType().getAncestorList();
+		for (int i = ancestors.size() - 1; i >= 0; i--) {
+			RubyModule t= (RubyModule) ancestors.get(i);
 
-        if (type.callMethod("method_defined?", read_completed).isTrue() || type.callMethod("private_method_defined?", read_completed).isTrue()) {
-            ThreadContext c = runtime.getCurrentContext();
-            IRubyObject m = type.callMethod("instance_method", read_completed);
-            m.callMethod(c,"bind",o).callMethod(c,"call");
-        }
+			if (t.callMethod("method_defined?", read_completed).isTrue() || t.callMethod("private_method_defined?", read_completed).isTrue()) {
+			    ThreadContext c = runtime.getCurrentContext();
+			    IRubyObject m = t.callMethod("instance_method", read_completed);
+			    m.callMethod(c,"bind",o).callMethod(c, "call");
+			}
+		}
     }
 
     /**
