@@ -1,13 +1,23 @@
 package org.jenkinsci.jruby;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import junit.framework.TestCase;
+import org.jruby.Ruby;
 import org.jruby.RubyArray;
 import org.jruby.RubyHash;
 import org.jruby.RubyObject;
+import org.jruby.embed.LocalContextScope;
 import org.jruby.embed.ScriptingContainer;
 import org.jruby.runtime.ThreadContext;
+import org.jruby.runtime.builtin.IRubyObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -98,5 +108,56 @@ public class BasicTest extends TestCase {
         // verify the call order of read_completed
         assertEquals("bdf",r.callMethod("s").toJava(String.class));
 	    assertEquals("y", r.callMethod("x").toJava(String.class));
+    }
+
+    /**
+     * Mixing & matching objects from multiple ruby VMs.
+     */
+    public void testCrossVM() {
+        final ScriptingContainer r1 = new ScriptingContainer(LocalContextScope.SINGLETHREAD);
+        final ScriptingContainer r2 = new ScriptingContainer(LocalContextScope.SINGLETHREAD);
+
+        assertNotSame(r1.getProvider().getRuntime(), r2.getProvider().getRuntime());
+
+        xs = new XStream() {
+            @Override
+            protected MapperWrapper wrapMapper(MapperWrapper next) {
+                return new JRubyMapper(next);
+            }
+        };
+        JRubyXStream.register(xs, new RubyRuntimeResolver() {
+            @Override
+            public Ruby unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+                switch(Integer.parseInt(reader.getAttribute("runtime"))) {
+                case 0: return r1.getProvider().getRuntime();
+                case 1: return r2.getProvider().getRuntime();
+                default:    throw new AssertionError();
+                }
+            }
+
+            @Override
+            public void marshal(IRubyObject instance, HierarchicalStreamWriter writer, MarshallingContext context) {
+                Ruby r = instance.getRuntime();
+                int i;
+                if (r==r1.getProvider().getRuntime())  i=0;
+                else
+                if (r==r2.getProvider().getRuntime())  i=1;
+                else
+                    throw new AssertionError();
+
+                writer.addAttribute("runtime",String.valueOf(i));
+            }
+        });
+
+        Map before = new HashMap();
+        before.put("o1", r1.runScriptlet("Object"));
+        before.put("o2", r2.runScriptlet("Object"));
+
+        String xml = xs.toXML(before);
+        System.out.println(xml);
+        Map after = (Map)xs.fromXML(xml);
+
+        assertSame(before.get("o1"),after.get("o1"));
+        assertSame(before.get("o2"),after.get("o2"));
     }
 }
