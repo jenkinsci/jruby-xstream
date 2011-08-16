@@ -7,7 +7,7 @@
   </parent>
 
   <artifactId>jruby-xstream</artifactId>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
   <name>JRuby support for XStream</name>
 
   <dependencies>
