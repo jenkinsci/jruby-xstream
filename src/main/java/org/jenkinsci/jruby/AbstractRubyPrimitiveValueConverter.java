@@ -9,16 +9,18 @@ import org.jruby.Ruby;
 import org.jruby.runtime.builtin.IRubyObject;
 
 /**
+ * Base class for converting simple values that maps to a string.
+ *
  * @author Kohsuke Kawaguchi
  */
 public abstract class AbstractRubyPrimitiveValueConverter<T extends IRubyObject> implements Converter {
-    protected final Ruby runtime;
+    protected final RubyRuntimeResolver resolver;
     protected final Class<T> type;
-    protected abstract T fromString(String value);
+    protected abstract T fromString(Ruby runtime, String value);
     protected abstract String toString(T obj);
 
-    protected AbstractRubyPrimitiveValueConverter(Ruby runtime, Class<T> type) {
-        this.runtime = runtime;
+    protected AbstractRubyPrimitiveValueConverter(RubyRuntimeResolver resolver, Class<T> type) {
+        this.resolver = resolver;
         this.type = type;
     }
 
@@ -27,11 +29,14 @@ public abstract class AbstractRubyPrimitiveValueConverter<T extends IRubyObject>
     }
 
     public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-        writer.addAttribute("ruby-class", ((IRubyObject)source).getType().getName());
+        IRubyObject o = (IRubyObject) source;
+        resolver.marshal(o,writer,context);
+        writer.addAttribute("ruby-class", o.getType().getName());
         writer.setValue(toString((T)source));
     }
 
     public T unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-        return fromString(reader.getValue());
+        Ruby runtime = resolver.unmarshal(reader, context);
+        return fromString(runtime,reader.getValue());
     }
 }

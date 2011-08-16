@@ -28,16 +28,14 @@ import java.util.List;
  * @author Kohsuke Kawaguchi
  */
 public class JRubyXStreamConverter implements Converter {
-    private final Ruby runtime;
+    private final RubyRuntimeResolver resolver;
     private final XStream xs;
     protected final Mapper mapper;
-    private final RubySymbol read_completed;
 
-    public JRubyXStreamConverter(XStream xs, Ruby runtime) {
+    public JRubyXStreamConverter(XStream xs, RubyRuntimeResolver resolver) {
         this.xs = xs;
-        this.runtime = runtime;
+        this.resolver = resolver;
         this.mapper = xs.getMapper();
-        read_completed = runtime.newSymbol("read_completed");
     }
 
     public boolean canConvert(Class type) {
@@ -48,6 +46,8 @@ public class JRubyXStreamConverter implements Converter {
         RubyBasicObject o = (RubyBasicObject) source;
         RubyClass t = o.getType();
         writer.addAttribute("ruby-class", t.getName());
+        Ruby runtime = o.getRuntime();
+        resolver.marshal(o,writer,context);
 
         boolean hasTransient = t.getType().getMethods().containsKey("transient?");
 
@@ -78,8 +78,9 @@ public class JRubyXStreamConverter implements Converter {
     }
 
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+        Ruby runtime = resolver.unmarshal(reader,context);
         String className = reader.getAttribute("ruby-class");
-        RubyClass c = resolveClass(className);
+        RubyClass c = resolveClass(runtime,className);
         if (c==null)
             throw new IllegalArgumentException("Undefined class: "+className);
 
@@ -123,6 +124,10 @@ public class JRubyXStreamConverter implements Converter {
      * Invokes all the defined read_completed methods.
      */
     private void callReadCompleted(IRubyObject o) {
+        Ruby runtime = o.getRuntime();
+        RubySymbol read_completed = runtime.newSymbol("read_completed");
+
+
 	    List<IRubyObject> ancestors = o.getType().getAncestorList();
 		for (int i = ancestors.size() - 1; i >= 0; i--) {
 			RubyModule t= (RubyModule) ancestors.get(i);
@@ -138,7 +143,7 @@ public class JRubyXStreamConverter implements Converter {
     /**
      * Resolves a fully qualified class name like "Foo::Bar::Zot" to {@link RubyClass}.
      */
-    private RubyClass resolveClass(String className) {
+    private RubyClass resolveClass(Ruby runtime, String className) {
         RubyModule cur = runtime.getObject();
         for (String token : className.split("::")) {
             IRubyObject o = cur.getConstantAt(token);

@@ -7,8 +7,8 @@ import org.jruby.RubySymbol;
  * @author Kohsuke Kawaguchi
  */
 public class RubySymbolConverter extends AbstractRubyPrimitiveValueConverter<RubySymbol> {
-    public RubySymbolConverter(Ruby runtime) {
-        super(runtime, RubySymbol.class);
+    public RubySymbolConverter(RubyRuntimeResolver resolver) {
+        super(resolver, RubySymbol.class);
     }
 
     @Override
@@ -17,7 +17,7 @@ public class RubySymbolConverter extends AbstractRubyPrimitiveValueConverter<Rub
     }
 
     @Override
-    public RubySymbol fromString(String str) {
+    public RubySymbol fromString(Ruby runtime, String str) {
         return RubySymbol.newSymbol(runtime,str);
     }
 }

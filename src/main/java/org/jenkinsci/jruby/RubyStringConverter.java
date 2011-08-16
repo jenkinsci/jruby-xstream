@@ -7,8 +7,8 @@ import org.jruby.RubyString;
  * @author Kohsuke Kawaguchi
  */
 public class RubyStringConverter extends AbstractRubyPrimitiveValueConverter<RubyString> {
-    public RubyStringConverter(Ruby runtime) {
-        super(runtime, RubyString.class);
+    public RubyStringConverter(RubyRuntimeResolver resolver) {
+        super(resolver, RubyString.class);
     }
 
     @Override
@@ -17,7 +17,7 @@ public class RubyStringConverter extends AbstractRubyPrimitiveValueConverter<Rub
     }
 
     @Override
-    public RubyString fromString(String str) {
+    public RubyString fromString(Ruby runtime, String str) {
         return RubyString.newString(runtime,str);
     }
 }

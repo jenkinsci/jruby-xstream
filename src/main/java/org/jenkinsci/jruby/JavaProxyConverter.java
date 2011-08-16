@@ -31,12 +31,10 @@ import java.lang.reflect.Field;
  * @author Kohsuke Kawaguchi
  */
 public class JavaProxyConverter implements Converter {
-    private final Ruby runtime;
     private final ReflectionProvider reflectionProvider;
     private final AbstractReflectionConverter reflectionConverter;
 
-    public JavaProxyConverter(Ruby runtime, XStream owner, AbstractReflectionConverter reflectionConverter) {
-        this.runtime = runtime;
+    public JavaProxyConverter(XStream owner, AbstractReflectionConverter reflectionConverter) {
         this.reflectionConverter = reflectionConverter;
         this.reflectionProvider = owner.getReflectionProvider();
     }

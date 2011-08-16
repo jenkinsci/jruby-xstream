@@ -13,10 +13,10 @@ import org.jruby.runtime.builtin.IRubyObject;
  * @author Kohsuke Kawaguchi
  */
 public class RubyArrayConverter implements Converter {
-    private final Ruby runtime;
+    private final RubyRuntimeResolver resolver;
 
-    public RubyArrayConverter(Ruby runtime) {
-        this.runtime = runtime;
+    public RubyArrayConverter(RubyRuntimeResolver resolver) {
+        this.resolver = resolver;
     }
 
     public boolean canConvert(Class type) {
@@ -28,6 +28,7 @@ public class RubyArrayConverter implements Converter {
         RubyArray ra = (RubyArray) o;
         int len = ra.getLength();
 
+        resolver.marshal(ra,writer,context);
         writer.addAttribute("ruby-class", ra.getType().getName());
 
         for (int i = 0; i < len; i++) {
@@ -40,6 +41,7 @@ public class RubyArrayConverter implements Converter {
     }
 
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+        Ruby runtime = resolver.unmarshal(reader,context);
         RubyArray a = RubyArray.newArray(runtime);
 
         // read the items from xml into a list

@@ -7,12 +7,12 @@ import org.jruby.RubyBoolean;
  * @author Kohsuke Kawaguchi
  */
 public class RubyBooleanConverter extends AbstractRubyPrimitiveValueConverter<RubyBoolean> {
-    public RubyBooleanConverter(Ruby runtime) {
-        super(runtime, RubyBoolean.class);
+    public RubyBooleanConverter(RubyRuntimeResolver resolver) {
+        super(resolver, RubyBoolean.class);
     }
 
     @Override
-    protected RubyBoolean fromString(String value) {
+    protected RubyBoolean fromString(Ruby runtime, String value) {
         return RubyBoolean.newBoolean(runtime,value.equalsIgnoreCase("true"));
     }
 

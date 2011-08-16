@@ -14,16 +14,20 @@ public class JRubyXStream {
     /**
      * Registers all the Ruby-related converters to the given XStream.
      */
+    public static void register(XStream xs, RubyRuntimeResolver resolver) {
+        xs.registerConverter(new RubyStringConverter(resolver));
+        xs.registerConverter(new RubyFixnumConverter(resolver));
+        xs.registerConverter(new RubyIntegerConverter(resolver));
+        xs.registerConverter(new RubyBooleanConverter(resolver));
+        xs.registerConverter(new RubySymbolConverter(resolver));
+        xs.registerConverter(new RubyArrayConverter(resolver));
+        xs.registerConverter(new RubyHashConverter(resolver));
+        xs.registerConverter(new JavaProxyConverter(xs, new ReflectionConverter(xs.getMapper(),xs.getReflectionProvider())));
+        xs.registerConverter(new JRubyXStreamConverter(xs,resolver), XStream.PRIORITY_LOW);
+    }
+
     public static void register(XStream xs, Ruby runtime) {
-        xs.registerConverter(new RubyStringConverter(runtime));
-        xs.registerConverter(new RubyFixnumConverter(runtime));
-        xs.registerConverter(new RubyIntegerConverter(runtime));
-        xs.registerConverter(new RubyBooleanConverter(runtime));
-        xs.registerConverter(new RubySymbolConverter(runtime));
-        xs.registerConverter(new RubyArrayConverter(runtime));
-        xs.registerConverter(new RubyHashConverter(runtime));
-        xs.registerConverter(new JavaProxyConverter(runtime,xs, new ReflectionConverter(xs.getMapper(),xs.getReflectionProvider())));
-        xs.registerConverter(new JRubyXStreamConverter(xs,runtime), XStream.PRIORITY_LOW);
+        register(xs,RubyRuntimeResolver.of(runtime));
     }
 
     public static void register(XStream xs, ScriptingContainer container) {

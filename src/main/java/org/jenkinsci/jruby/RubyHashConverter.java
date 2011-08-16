@@ -16,10 +16,10 @@ import java.util.Set;
  * @author Kohsuke Kawaguchi
  */
 public class RubyHashConverter implements Converter {
-    private final Ruby runtime;
+    private final RubyRuntimeResolver resolver;
 
-    public RubyHashConverter(Ruby runtime) {
-        this.runtime = runtime;
+    public RubyHashConverter(RubyRuntimeResolver resolver) {
+        this.resolver = resolver;
     }
 
     public boolean canConvert(Class type) {
@@ -28,6 +28,7 @@ public class RubyHashConverter implements Converter {
 
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext context) {
         RubyHash hash = (RubyHash) o;
+        resolver.marshal(hash,writer,context);
         writer.addAttribute("ruby-class", hash.getType().getName());
 
         for (Entry e : (Set<Entry>)hash.directEntrySet()) {
@@ -43,6 +44,7 @@ public class RubyHashConverter implements Converter {
     }
 
     public RubyHash unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+        Ruby runtime = resolver.unmarshal(reader,context);
         RubyHash hash = RubyHash.newHash(runtime);
 
         // read the items from xml into a list

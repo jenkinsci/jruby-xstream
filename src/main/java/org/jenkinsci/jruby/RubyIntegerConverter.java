@@ -7,12 +7,12 @@ import org.jruby.RubyBignum;
  * @author Kohsuke Kawaguchi
  */
 public class RubyIntegerConverter extends AbstractRubyPrimitiveValueConverter<RubyBignum> {
-    public RubyIntegerConverter(Ruby runtime) {
-        super(runtime, RubyBignum.class);
+    public RubyIntegerConverter(RubyRuntimeResolver resolver) {
+        super(resolver, RubyBignum.class);
     }
 
     @Override
-    protected RubyBignum fromString(String value) {
+    protected RubyBignum fromString(Ruby runtime, String value) {
         return RubyBignum.newBignum(runtime,value);
     }
 
