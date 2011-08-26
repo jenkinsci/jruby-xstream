@@ -81,6 +81,10 @@ public class JavaProxyConverter implements Converter {
         // unmarshal the Java portion that comes from the base type
         reflectionConverter.doUnmarshal(javaObject,reader,context);
 
+        // JRubyXStreamConverter avoids callign this just for the proxy
+        // since the Ruby object is still not fully constructed yet.
+        JRubyXStreamConverter.callReadCompleted(original);
+
         return javaObject;
     }
 

@@ -12,6 +12,7 @@ import org.jruby.RubyBasicObject;
 import org.jruby.RubyClass;
 import org.jruby.RubyModule;
 import org.jruby.RubySymbol;
+import org.jruby.java.proxies.JavaProxy;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.runtime.builtin.Variable;
@@ -115,7 +116,10 @@ public class JRubyXStreamConverter implements Converter {
         }
 
         // invoke readResolve if available
-        callReadCompleted(o);
+        // note that for JavaProxy, we need to wait until the corresponding Java object gets unmarshalled
+        // fully via JavaProxyConverter, so we let that make a call.
+        if (!(o instanceof JavaProxy))
+            callReadCompleted(o);
 
         return o;
     }
@@ -123,7 +127,7 @@ public class JRubyXStreamConverter implements Converter {
     /**
      * Invokes all the defined read_completed methods.
      */
-    private void callReadCompleted(IRubyObject o) {
+    /*package*/ static void callReadCompleted(IRubyObject o) {
         Ruby runtime = o.getRuntime();
         RubySymbol read_completed = runtime.newSymbol("read_completed");
 

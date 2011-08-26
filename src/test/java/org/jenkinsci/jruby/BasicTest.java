@@ -16,6 +16,7 @@ import org.jruby.embed.ScriptingContainer;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,6 +109,12 @@ public class BasicTest extends TestCase {
         // verify the call order of read_completed
         assertEquals("bdf",r.callMethod("s").toJava(String.class));
 	    assertEquals("y", r.callMethod("x").toJava(String.class));
+    }
+
+    public void testProxyAndReadCompleted() {
+        SomeJavaObject f = (SomeJavaObject)jruby.runScriptlet("require 'org/jenkinsci/jruby/proxy_read_completed'; Foo.new");
+        SomeJavaObject r = roundtrip(f);
+        assertEquals(1,r.x);
     }
 
     /**
