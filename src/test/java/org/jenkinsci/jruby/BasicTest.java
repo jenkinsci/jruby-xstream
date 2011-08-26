@@ -31,7 +31,7 @@ public class BasicTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        jruby = new ScriptingContainer();
+        jruby = new ScriptingContainer(LocalContextScope.SINGLETHREAD);
         xs = new XStream() {
             @Override
             protected MapperWrapper wrapMapper(MapperWrapper next) {
