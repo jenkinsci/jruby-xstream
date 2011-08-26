@@ -49,7 +49,7 @@ public class JRubyXStreamConverter implements Converter {
         Ruby runtime = o.getRuntime();
         resolver.marshal(o,writer,context);
 
-        boolean hasTransient = t.getType().getMethods().containsKey("transient?");
+        boolean hasTransient = t.respondsTo("transient?");
 
         for (Variable v : o.getVariableList()) {
             Object value = v.getValue();

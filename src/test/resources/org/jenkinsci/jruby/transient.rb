@@ -1,20 +1,20 @@
-class Class
-  def transient(*properties)
-    properties.each do |p|
-      transients[p.to_sym] = true
-    end
+
+
+module Transient
+  def transient?(field)
+    @transients[field.to_s] ? true : false
   end
 
-  def transient?(property)
-    transients.keys.member?(property.to_sym) || (superclass < Class && superclass.transient?(property))
-  end
-
-  def transients
+  def transient(*fields)
     @transients ||= {}
+    fields.each do |field|
+      @transients[field.to_s] = true
+    end
   end
 end
 
 class Point
+  extend Transient
   attr_accessor :x, :y
   transient :x
 end
