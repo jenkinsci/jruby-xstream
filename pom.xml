@@ -3,8 +3,13 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.19</version>
+    <version>1.36</version>
   </parent>
+
+  <properties>
+    <jenkins.version>1.609.1</jenkins.version>
+    <hpi-plugin.version>1.106</hpi-plugin.version>
+  </properties>
 
   <artifactId>jruby-xstream</artifactId>
   <version>1.4-SNAPSHOT</version>
@@ -20,13 +25,13 @@
     <dependency>
       <groupId>org.jvnet.hudson</groupId>
       <artifactId>xstream</artifactId>
-      <version>1.3.1-hudson-8</version>
+      <version>1.4.7-jenkins-1</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jruby</groupId>
       <artifactId>jruby-complete</artifactId>
-      <version>1.6.1</version>
+      <version>1.7.18</version>
       <optional>true</optional>
     </dependency>
   </dependencies>
@@ -39,8 +44,24 @@
 
   <repositories>
     <repository>
-      <id>m.g.o-public</id>
-      <url>http://maven.glassfish.org/content/groups/public/</url>
+      <id>jenkins-releases</id>
+      <url>http://repo.jenkins-ci.org/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>jenkins-snapshots</id>
+      <url>http://repo.jenkins-ci.org/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
   </repositories>
   <licenses>
